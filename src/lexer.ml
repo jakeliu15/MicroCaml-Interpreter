@@ -13,11 +13,7 @@ let tokenize input =
       in
       if string_match (regexp "^\\(-?[0-9]+\\)") input 0 then
         let matched = matched_group 1 input in
-        let n = if matched.[0] = '(' then
-                    
-                    int_of_string (String.sub matched 1 ((String.length matched) - 2))
-                  else
-                    int_of_string matched
+        let n = if matched.[0] = '' then int_of_string (String.sub matched 1 ((String.length matched) - 2)) else int_of_string matched
         in
         helper (string_after input (String.length matched)) (Tok_Int n :: tokens)
       else if string_match (regexp "^\\\"[^\"]*\\\"") input 0 then
