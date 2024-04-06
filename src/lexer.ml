@@ -13,7 +13,7 @@ let tokenize input =
       in
       if string_match (regexp "^\\(-?[0-9]+\\)") input 0 then
         let matched = matched_group 1 input in
-        let n = if matched.[0] = '' then int_of_string (String.sub matched 1 ((String.length matched) - 2)) else int_of_string matched
+        let n = if matched.[0] = "(" then int_of_string (String.sub matched 1 ((String.length matched) - 2)) else int_of_string matched
         in
         helper (string_after input (String.length matched)) (Tok_Int n :: tokens)
       else if string_match (regexp "^\\\"[^\"]*\\\"") input 0 then
@@ -28,21 +28,21 @@ let tokenize input =
         let token = if bool = "true" then Tok_Bool true else Tok_Bool false in
         helper (string_after input (String.length bool)) (token :: tokens)
       else match input.[0] with
-        | '(' -> helper (string_after input 1) (Tok_LParen :: tokens)
-        | ')' -> helper (string_after input 1) (Tok_RParen :: tokens)
-        | '{' -> helper (string_after input 1) (Tok_LCurly :: tokens)
-        | '}' -> helper (string_after input 1) (Tok_RCurly :: tokens)
-        | '.' -> helper (string_after input 1) (Tok_Dot :: tokens)
-        | '+' -> helper (string_after input 1) (Tok_Add :: tokens)
-        | '-' -> 
+        | "(" -> helper (string_after input 1) (Tok_LParen :: tokens)
+        | ")" -> helper (string_after input 1) (Tok_RParen :: tokens)
+        | "{" -> helper (string_after input 1) (Tok_LCurly :: tokens)
+        | "}" -> helper (string_after input 1) (Tok_RCurly :: tokens)
+        | "." -> helper (string_after input 1) (Tok_Dot :: tokens)
+        | "+" -> helper (string_after input 1) (Tok_Add :: tokens)
+        | "-" -> 
             if string_startswith input "->" then
               helper (string_after input 2) (Tok_Arrow :: tokens)
             else
               helper (string_after input 1) (Tok_Sub :: tokens)
-        | '*' -> helper (string_after input 1) (Tok_Mult :: tokens)
-        | '/' -> helper (string_after input 1) (Tok_Div :: tokens)
-        | '^' -> helper (string_after input 1) (Tok_Concat :: tokens)
-        | ';' -> 
+        | "*" -> helper (string_after input 1) (Tok_Mult :: tokens)
+        | "/" -> helper (string_after input 1) (Tok_Div :: tokens)
+        | "^" -> helper (string_after input 1) (Tok_Concat :: tokens)
+        | ";" -> 
             if string_startswith input ";;" then
               helper (string_after input 2) (Tok_DoubleSemi :: tokens)
             else
