@@ -170,15 +170,16 @@ and parse_unary toks =
     toks, Not expr
   | _ -> parse_app toks
 
-and parse_app toks =
-  let toks, expr = parse_select toks in
-  match lookahead toks with
-  | Some Tok_LParen ->
-    let toks = match_token toks Tok_LParen in
-    let toks, arg = parse_expr toks in
-    let toks = match_token toks Tok_RParen in
-    toks, App (expr, arg)
-  | _ -> toks, expr
+
+  and parse_app toks =
+    let toks, func = parse_primary toks in  
+    match lookahead toks with
+    | Some Tok_ID _ | Some Tok_Int _ | Some Tok_Bool _ | Some Tok_String _ | Some Tok_LParen ->
+     
+      let toks, arg = parse_primary toks in
+      toks, App (func, arg)
+    | _ -> toks, func
+  
 
 and parse_select toks =
   let toks, expr = parse_primary toks in

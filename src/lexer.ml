@@ -86,7 +86,7 @@ let tokenize input =
               helper (ignore_spaces (string_after input 1)) (Tok_Semi :: tokens)
         | '=' ->
             if Str.string_match (Str.regexp "^=") input 0 then
-              helper (ignore_spaces (string_after input 2)) (Tok_Equal :: tokens)
+              helper (ignore_spaces (string_after input 1)) (Tok_Equal :: tokens)
             else
               raise InvalidInputException
         | '<' ->
