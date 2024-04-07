@@ -181,16 +181,18 @@ and parse_unary toks =
     | _ -> toks, func
   
 
-and parse_select toks =
-  let toks, expr = parse_primary toks in
+(* Parses expressions, extending primary expressions with possible Select expressions. *)
+and parse_primary toks =
+  let toks, primary_expr = parse_pprimary toks in
   match lookahead toks with
   | Some Tok_Dot ->
     let toks = match_token toks Tok_Dot in
     let toks, lab = parse_id toks in
-    toks, Select (Lab lab, expr)
-  | _ -> toks, expr
+    toks, Select (Lab lab, primary_expr)
+  | _ -> toks, primary_expr
 
-and parse_primary toks =
+(* Adjusted parse_primary without the Select handling part *)
+and parse_pprimary toks =
   match lookahead toks with
   | Some Tok_Int i ->
     let toks = match_token toks (Tok_Int i) in
@@ -202,7 +204,7 @@ and parse_primary toks =
     let toks = match_token toks (Tok_String s) in
     toks, String s
   | Some Tok_ID id ->
-    let toks, id = parse_id toks in
+    let toks = match_token toks (Tok_ID id) in
     toks, ID id
   | Some Tok_LParen ->
     let toks = match_token toks Tok_LParen in
@@ -212,6 +214,8 @@ and parse_primary toks =
   | Some Tok_LCurly ->
     parse_record toks
   | _ -> raise (InvalidInputException "Expected primary expression")
+
+
 
 and parse_record toks =
   let toks = match_token toks Tok_LCurly in
