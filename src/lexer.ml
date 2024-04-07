@@ -17,15 +17,13 @@ let tokenize input =
     else
       let input = ignore_spaces input in  
 
-      match input.[0] with
-      | '-' ->
-        if Str.string_match (Str.regexp "^->") input 0 then
-          helper (ignore_spaces (string_after input 2)) (Tok_Arrow :: tokens)
-        else
-          helper (ignore_spaces (string_after input 1)) (Tok_Sub :: tokens)
-      | _ ->
+      if string_match (regexp "^\\([0-9]+-?\\)") input 0 then
+        let matched = String.sub (matched_group 1 input) 0 1 in
+        let n = int_of_string matched in
+        helper (ignore_spaces (string_after input (String.length matched + 1))) (Tok_Sub :: Tok_Int n :: tokens)
+   
 
-      if string_match (regexp "^\\(-?[0-9]+\\)") input 0 then
+      else if string_match (regexp "^\\(-?[0-9]+\\)") input 0 then
         let matched = matched_group 1 input in
         let n = int_of_string matched in
         helper (ignore_spaces (string_after input (String.length matched))) (Tok_Int n :: tokens)
