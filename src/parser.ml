@@ -181,7 +181,7 @@ and parse_unary toks =
     | _ -> toks, func
   
 
-(* Parses expressions, extending primary expressions with possible Select expressions. *)
+
 and parse_primary toks =
   let toks, primary_expr = parse_pprimary toks in
   match lookahead toks with
@@ -191,7 +191,7 @@ and parse_primary toks =
     toks, Select (Lab lab, primary_expr)
   | _ -> toks, primary_expr
 
-(* Adjusted parse_primary without the Select handling part *)
+
 and parse_pprimary toks =
   match lookahead toks with
   | Some Tok_Int i ->
