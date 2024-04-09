@@ -183,7 +183,7 @@ and parse_unary toks =
 
 
 and parse_primary toks =
-  let toks, primary_expr = parse_pprimary toks in
+  let toks, primary_expr = parse_partial_primary toks in
   match lookahead toks with
   | Some Tok_Dot ->
     let toks = match_token toks Tok_Dot in
@@ -192,7 +192,7 @@ and parse_primary toks =
   | _ -> toks, primary_expr
 
 
-and parse_pprimary toks =
+and parse_partial_primary toks =
   match lookahead toks with
   | Some Tok_Int i ->
     let toks = match_token toks (Tok_Int i) in
