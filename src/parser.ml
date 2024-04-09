@@ -33,11 +33,10 @@ let rec lookahead_many (toks : token list) (n : int) =
 
 (* Part 2: Parsing expressions *)
 
-exception InvalidInputException of string
 
 let rec parse_expr toks =
   match lookahead toks with
-  | None -> raise (InvalidInputException "Expected expression")
+  | None -> raise (InvalidInputException ("parse_expr"))
   | Some tok ->
     match tok with
     | Tok_Let ->
@@ -213,7 +212,7 @@ and parse_partial_primary toks =
     toks, expr
   | Some Tok_LCurly ->
     parse_record toks
-  | _ -> raise (InvalidInputException "Expected primary expression")
+  | _ -> raise(InvalidInputException ("partial"))
 
 
 
@@ -244,11 +243,11 @@ and parse_id toks =
   | Some (Tok_ID id) ->
     let toks = match_token toks (Tok_ID id) in
     toks, id
-  | _ -> raise (InvalidInputException "Expected identifier")
+  | _ -> raise (InvalidInputException ("parse_id"))
 
 let rec parse_mutop toks =
   match lookahead toks with
-  | None -> raise (InvalidInputException "Expected mutop")
+  | None -> raise (InvalidInputException ("parse_mutop"))
   | Some Tok_Def -> parse_def_mutop toks
   | Some Tok_DoubleSemi -> match_token toks Tok_DoubleSemi, NoOp
   | _ -> parse_expr_mutop toks
