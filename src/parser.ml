@@ -172,7 +172,11 @@ and parse_not toks =
   and parse_app toks =
     let toks, func = parse_primary toks in  
     match lookahead toks with
-    | Some Tok_ID _ | Some Tok_Int _ | Some Tok_Bool _ | Some Tok_String _ | Some Tok_LParen ->
+    | Some Tok_ID _
+    | Some Tok_Int _
+    | Some Tok_Bool _
+    | Some Tok_String _
+    | Some Tok_LParen ->
      
       let toks, arg = parse_primary toks in
       toks, App (func, arg)
