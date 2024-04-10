@@ -62,10 +62,10 @@ let rec eval_expr env e =
       | Bool false -> eval_expr env e3
       | _ -> raise (TypeError "Expected boolean in If condition"))
   | Let (x, recursive, e1, e2) ->
-      let new_env = if recursive then new_extend env x else env in
-      let v1 = eval_expr new_env e1 in
-      if recursive then update new_env x v1;
-      eval_expr (extend new_env x v1) e2
+        let new_env = if recursive then new_extend env x else env in
+        let v1 = eval_expr new_env e1 in
+        if recursive then update new_env x v1;
+        eval_expr (extend new_env x v1) e2
   | Fun (x, e1) -> Closure (env, x, e1)
   | App (e1, e2) ->
       let v1 = eval_expr env e1 in

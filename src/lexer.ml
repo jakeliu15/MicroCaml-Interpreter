@@ -21,7 +21,7 @@ let tokenize pos =
         let n = int_of_string matched in
         helper (ignore_spaces (string_after pos (String.length matched + 1))) (Tok_Sub :: Tok_Int n :: tokens) 
 
-      else if string_match (regexp "^--") pos 0 then raise (InvalidInputException("double negative"))
+     
 
       else if string_match (regexp "^\\(-?[0-9]+\\)") pos 0 then
         let matched = matched_group 1 pos in
