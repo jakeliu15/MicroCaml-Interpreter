@@ -15,7 +15,7 @@ let rec lookup env x =
 
 (* Creates a placeholder mapping for [x] in [env]; needed
    for handling recursive definitions *)
-let new_extend env x = (x, ref (Int 0)) :: env
+let extend_tmp env x = (x, ref (Int 0)) :: env
 
 (* Updates the (most recent) mapping in [env] for [x] to [v] *)
 let rec update env x v =
@@ -78,7 +78,7 @@ let rec update env x v =
          | Bool false -> eval_expr env e3
          | _ -> raise (TypeError "Expected boolean in If condition"))
     | Let (x, recursive, e1, e2) ->
-        let new_env = if recursive then new_extend env x else env in
+        let new_env = if recursive then extend_tmp env x else env in
         let v1 = eval_expr new_env e1 in
         if recursive then update new_env x v1;
         eval_expr (extend new_env x v1) e2
@@ -109,23 +109,12 @@ let rec update env x v =
    returning a possibly updated environment paired with
    a value option; throws an exception on error *)
 
-   let eval_mutop env m =
-    let def (x, e) env =
-      let v = eval_expr env e in
-      let new_env = extend env x v in
-      (new_env, Some v)
-    in
-    let expr e env =
-      let v = eval_expr env e in
-      (env, Some v)
-    in
-    let noop env = (env, None) in
-    match m with
-    | Def (x, e) -> def (x, e) env
-    | Expr e -> expr e env
-    | NoOp -> noop env
-    | _ -> raise (InvalidInputException("invalid input"))
-
-    
-
-    
+   let eval_mutop env = function
+   | NoOp -> (env, None)
+   | Expr expr ->
+       let result = eval_expr env expr in
+       (env, Some result)
+   | Def (var, expr) ->
+       let evaluated_expr = eval_expr env expr in  
+       let new_env = extend env var evaluated_expr in 
+       (new_env, Some evaluated_expr)

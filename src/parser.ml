@@ -33,7 +33,6 @@ let rec lookahead_many (toks : token list) (n : int) =
 
 (* Part 2: Parsing expressions *)
 
-
 let rec parse_expr toks =
   match lookahead toks with
   | None -> raise (InvalidInputException ("parse_expr"))
@@ -245,22 +244,32 @@ and parse_id toks =
     toks, id
   | _ -> raise (InvalidInputException ("parse_id"))
 
-let rec parse_mutop toks =
-  match lookahead toks with
-  | None -> raise (InvalidInputException ("parse_mutop"))
-  | Some Tok_Def -> parse_def_mutop toks
-  | Some Tok_DoubleSemi -> match_token toks Tok_DoubleSemi, NoOp
-  | _ -> parse_expr_mutop toks
-
-and parse_def_mutop toks =
-  let toks = match_token toks Tok_Def in
-  let toks, var = parse_id toks in
-  let toks = match_token toks Tok_Equal in
-  let toks, expr = parse_expr toks in
-  let toks = match_token toks Tok_DoubleSemi in
-  toks, Def (var, expr)
-
-and parse_expr_mutop toks =
-  let toks, expr = parse_expr toks in
-  let toks = match_token toks Tok_DoubleSemi in
-  toks, Expr expr
+  let rec parse_mutop toks =
+    match lookahead toks with
+    | None -> raise (InvalidInputException ("parse_mutop"))
+    | Some Tok_Def -> parse_def_mutop toks
+    | Some Tok_DoubleSemi -> match_token toks Tok_DoubleSemi, NoOp
+    | _ -> parse_expr_mutop toks
+  
+  and parse_def_mutop toks =
+    let toks = match_token toks Tok_Def in
+    let toks, var = parse_id toks in
+    let toks = match_token toks Tok_Equal in
+    let toks, expr = parse_def_expr toks in
+    let toks = match_token toks Tok_DoubleSemi in
+    toks, Def (var, expr)
+  
+  and parse_def_expr toks =
+    match lookahead toks with
+    | Some Tok_Fun ->
+      let toks = match_token toks Tok_Fun in
+      let toks, var = parse_id toks in
+      let toks = match_token toks Tok_Arrow in
+      let toks, expr = parse_expr toks in
+      toks, Fun (var, expr)
+    | _ -> parse_expr toks
+  
+  and parse_expr_mutop toks =
+    let toks, expr = parse_expr toks in
+    let toks = match_token toks Tok_DoubleSemi in
+    toks, Expr expr
