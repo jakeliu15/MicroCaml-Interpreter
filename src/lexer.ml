@@ -16,14 +16,14 @@ let tokenize pos =
     else
       let pos = ignore_spaces pos in  
 
-      if string_match (regexp "^\\([0-9]+-\\)") pos 0 then
+      if (string_match (regexp "^\\([0-9]+-\\)") pos 0) then
         let matched = String.sub (matched_group 1 pos) 0 1 in
         let n = int_of_string matched in
         helper (ignore_spaces (string_after pos (String.length matched + 1))) (Tok_Sub :: Tok_Int n :: tokens) 
 
      
 
-      else if string_match (regexp "^\\(-?[0-9]+\\)") pos 0 then
+      else if string_match (regexp "^\\([0-9]+\\)") pos 0 then
         let matched = matched_group 1 pos in
         let n = int_of_string matched in
         helper (ignore_spaces (string_after pos (String.length matched))) (Tok_Int n :: tokens)
@@ -117,10 +117,7 @@ let tokenize pos =
               helper (ignore_spaces (string_after pos 2)) (Tok_Or :: tokens)
             else
               raise (InvalidInputException ("2"))
-              | _ when Str.string_match (Str.regexp "^\"\\(\\\\\\\\\\|\\\\\"\\|[^\"]\\)*\"") pos 0 ->
-                let matched = Str.matched_string pos in
-                let str_content = Str.global_replace (Str.regexp "\\\\\\(\\\\\\\\\\|\\\"\\)") "\\1" (String.sub matched 1 (String.length matched - 2)) in
-                helper (ignore_spaces (string_after pos (String.length matched))) (Tok_String str_content :: tokens)
+              
         | _ -> raise (InvalidInputException ("3"))
   in
   helper pos []
