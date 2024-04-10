@@ -60,8 +60,14 @@ let rec update env x v =
          | LessEqual, _, _ -> raise (TypeError "Expected integers in LessEqual comparison")
          | Concat, String x, String y -> String (x ^ y)
          | Concat, _, _ -> raise (TypeError "Expected strings in concatenation")
-         | Equal, _, _ -> Bool (v1 = v2)
-         | NotEqual, _, _ -> Bool (v1 <> v2)
+         | Equal, Int x, Int y -> Bool (x = y)
+         | Equal, Bool x, Bool y -> Bool (x = y)
+         | Equal, String x, String y -> Bool (x = y)
+         | Equal, _, _ -> raise (TypeError "Cannot compare different types for equality")
+         | NotEqual, Int x, Int y -> Bool (x <> y)
+         | NotEqual, Bool x, Bool y -> Bool (x <> y)
+         | NotEqual, String x, String y -> Bool (x <> y)
+         | NotEqual, _, _ -> raise (TypeError "Cannot compare different types for inequality")
          | Or, Bool x, Bool y -> Bool (x || y)
          | Or, _, _ -> raise (TypeError "Expected booleans in Or operation")
          | And, Bool x, Bool y -> Bool (x && y)
@@ -95,7 +101,7 @@ let rec update env x v =
         (match eval_expr env e1 with
          | Record fields -> field fields
          | _ -> raise (TypeError "Expected record in Select expression"))
-    | Closure _ -> e
+    | Closure _ -> raise (TypeError "Cannot evaluate a closure")
 
 (* Part 2: Evaluating mutop directive *)
 
