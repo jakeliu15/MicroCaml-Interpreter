@@ -115,6 +115,13 @@ let rec update env x v =
        let result = eval_expr env expr in
        (env, Some result)
    | Def (var, expr) ->
-       let evaluated_expr = eval_expr env expr in  
-       let new_env = extend env var evaluated_expr in 
-       (new_env, Some evaluated_expr)
+        match expr with
+        | Fun (_, _) | Let (_, true, _, _) -> 
+            let placeholder = extend_tmp env var in 
+            let evaluation = eval_expr placeholder expr in  
+            update placeholder var evaluation;  
+            (placeholder, Some evaluation)
+        | _ ->  
+            let evaluation = eval_expr env expr in  
+            let new_env = extend env var evaluation in 
+            (new_env, Some evaluation)

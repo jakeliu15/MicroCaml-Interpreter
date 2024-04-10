@@ -83,7 +83,7 @@ and parse_or toks =
   | _ -> toks, expr
 
 and parse_and toks =
-  let toks, expr = parse_equality toks in
+  let toks, expr = parse_equal toks in
   match lookahead toks with
   | Some Tok_And ->
     let toks = match_token toks Tok_And in
@@ -91,68 +91,68 @@ and parse_and toks =
     toks, Binop (And, expr, expr2)
   | _ -> toks, expr
 
-and parse_equality toks =
+and parse_equal toks =
   let toks, expr = parse_relational toks in
   match lookahead toks with
   | Some Tok_Equal ->
     let toks = match_token toks Tok_Equal in
-    let toks, expr2 = parse_equality toks in
+    let toks, expr2 = parse_equal toks in
     toks, Binop (Equal, expr, expr2)
   | Some Tok_NotEqual ->
     let toks = match_token toks Tok_NotEqual in
-    let toks, expr2 = parse_equality toks in
+    let toks, expr2 = parse_equal toks in
     toks, Binop (NotEqual, expr, expr2)
   | _ -> toks, expr
 
 and parse_relational toks =
-  let toks, expr = parse_additive toks in
+  let toks, expr = parse_addsub toks in
   match lookahead toks with
   | Some Tok_Less ->
     let toks = match_token toks Tok_Less in
-    let toks, expr2 = parse_additive toks in
+    let toks, expr2 = parse_addsub toks in
     toks, Binop (Less, expr, expr2)
   | Some Tok_Greater ->
     let toks = match_token toks Tok_Greater in
-    let toks, expr2 = parse_additive toks in
+    let toks, expr2 = parse_addsub toks in
     toks, Binop (Greater, expr, expr2)
   | Some Tok_LessEqual ->
     let toks = match_token toks Tok_LessEqual in
-    let toks, expr2 = parse_additive toks in
+    let toks, expr2 = parse_addsub toks in
     toks, Binop (LessEqual, expr, expr2)
   | Some Tok_GreaterEqual ->
     let toks = match_token toks Tok_GreaterEqual in
-    let toks, expr2 = parse_additive toks in
+    let toks, expr2 = parse_addsub toks in
     toks, Binop (GreaterEqual, expr, expr2)
   | _ -> toks, expr
 
-and parse_additive toks =
-  let toks, expr = parse_multiplicative toks in
+and parse_addsub toks =
+  let toks, expr = parse_multdiv toks in
   match lookahead toks with
   | Some Tok_Add ->
     let toks = match_token toks Tok_Add in
-    let toks, expr2 = parse_additive toks in
+    let toks, expr2 = parse_addsub toks in
     toks, Binop (Add, expr, expr2)
   | Some Tok_Sub ->
     let toks = match_token toks Tok_Sub in
-    let toks, expr2 = parse_additive toks in
+    let toks, expr2 = parse_addsub toks in
     toks, Binop (Sub, expr, expr2)
   | _ -> toks, expr
 
-and parse_multiplicative toks =
+and parse_multdiv toks =
   let toks, expr = parse_concat toks in
   match lookahead toks with
   | Some Tok_Mult ->
     let toks = match_token toks Tok_Mult in
-    let toks, expr2 = parse_multiplicative toks in
+    let toks, expr2 = parse_multdiv toks in
     toks, Binop (Mult, expr, expr2)
   | Some Tok_Div ->
     let toks = match_token toks Tok_Div in
-    let toks, expr2 = parse_multiplicative toks in
+    let toks, expr2 = parse_multdiv toks in
     toks, Binop (Div, expr, expr2)
   | _ -> toks, expr
 
 and parse_concat toks =
-  let toks, expr = parse_unary toks in
+  let toks, expr = parse_not toks in
   match lookahead toks with
   | Some Tok_Concat ->
     let toks = match_token toks Tok_Concat in
@@ -160,11 +160,11 @@ and parse_concat toks =
     toks, Binop (Concat, expr, expr2)
   | _ -> toks, expr
 
-and parse_unary toks =
+and parse_not toks =
   match lookahead toks with
   | Some Tok_Not ->
     let toks = match_token toks Tok_Not in
-    let toks, expr = parse_unary toks in
+    let toks, expr = parse_not toks in
     toks, Not expr
   | _ -> parse_app toks
 
