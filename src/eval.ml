@@ -27,15 +27,16 @@ let rec update env x v =
 (* Evaluates MicroCaml expression [e] in environment [env],
    returning an expression, or throwing an exception on error *)
 let rec eval_expr env e =
-  match e with
+    match e with
   | Int _ 
   | Bool _ 
-  | String _ -> e
+  | String _ 
+  | Closure _ -> e
   | ID x -> lookup env x
   | Not e1 ->
       (match eval_expr env e1 with
       | Bool b -> Bool (not b)
-      | _ -> raise (InvalidInputException "Invalid input"))
+      | _ -> raise (InvalidInputException "Not expects a boolean"))
   | Binop (op, e1, e2) ->
       let v1 = eval_expr env e1 in
       let v2 = eval_expr env e2 in
@@ -54,59 +55,36 @@ let rec eval_expr env e =
       | NotEqual, _, _ -> Bool (v1 <> v2)
       | Or, Bool x, Bool y -> Bool (x || y)
       | And, Bool x, Bool y -> Bool (x && y)
-      | _ -> raise (InvalidInputException "Invalid input"))
+      | _ -> raise (InvalidInputException "Invalid binary operator"))
   | If (e1, e2, e3) ->
       (match eval_expr env e1 with
       | Bool true -> eval_expr env e2
       | Bool false -> eval_expr env e3
-      | _ -> raise (InvalidInputException "Invalid input"))
+      | _ -> raise (InvalidInputException "If expects a boolean condition"))
   | Let (x, recursive, e1, e2) ->
-      let new_env = if recursive then extend env x (Int 0) else env in
+      let new_env = if recursive then new_extend env x else env in
       let v1 = eval_expr new_env e1 in
       if recursive then update new_env x v1;
       eval_expr (extend new_env x v1) e2
-  | Fun (x, e1) -> Closure (env, x, e1)
+  | Fun (x, e) -> Closure (env, x, e)
   | App (e1, e2) ->
       let v1 = eval_expr env e1 in
       let v2 = eval_expr env e2 in
       (match v1 with
       | Closure (closure, x, e) -> eval_expr (extend closure x v2) e
-      | _ -> raise (InvalidInputException "Invalid input"))
-      | Let (x, recursive, e1, e2) ->
-        let process_let env =
-          let new_env = if recursive then extend env x (Int 0) else env in
-          let v1 = eval_expr new_env e1 in
-          if recursive then update new_env x v1;
-          eval_expr (extend new_env x v1) e2
-        in
-        process_let env
-    | Fun (x, e1) ->
-        let create_closure env = Closure (env, x, e1) in
-        create_closure env
-    | App (e1, e2) ->
-        let process_app env =
-          let v1 = eval_expr env e1 in
-          let v2 = eval_expr env e2 in
-          let apply_closure closure_env x v =
-            eval_expr (extend closure_env x v) (lookup closure_env x)
-          in
-          match v1 with
-          | Closure (closure_env, x, e) -> apply_closure closure_env x v2
-          | _ -> raise (InvalidInputException "Invalid input")
-        in
-        process_app env
+      | _ -> raise (InvalidInputException "Application expects a function"))
   | Record field_list ->
       let eval_field (Lab l, e) = (Lab l, eval_expr env e) in
       Record (List.map eval_field field_list)
   | Select (Lab l, e1) ->
-      let rec field fields =
+      let rec lookup_field fields =
         match fields with
-        | [] -> raise (InvalidInputException "Invalid input")
-        | (Lab l2, v) :: t -> if l = l2 then v else field t in
+        | [] -> raise (InvalidInputException ("Field " ^ l ^ " not found"))
+        | (Lab l2, v) :: t -> if l = l2 then v else lookup_field t
+      in
       (match eval_expr env e1 with
-      | Record fields -> field fields
-      | _ -> raise (InvalidInputException "Invalid input"))
-      | Closure _ -> e 
+      | Record fields -> lookup_field fields
+      | _ -> raise (InvalidInputException "Select expects a record"))
 
 (* Part 2: Evaluating mutop directive *)
 
