@@ -117,6 +117,10 @@ let tokenize pos =
               helper (ignore_spaces (string_after pos 2)) (Tok_Or :: tokens)
             else
               raise (InvalidInputException ("2"))
+              | _ when Str.string_match (Str.regexp "^\"\\(\\\\\\\\\\|\\\\\"\\|[^\"]\\)*\"") pos 0 ->
+                let matched = Str.matched_string pos in
+                let str_content = Str.global_replace (Str.regexp "\\\\\\(\\\\\\\\\\|\\\"\\)") "\\1" (String.sub matched 1 (String.length matched - 2)) in
+                helper (ignore_spaces (string_after pos (String.length matched))) (Tok_String str_content :: tokens)
         | _ -> raise (InvalidInputException ("3"))
   in
   helper pos []
