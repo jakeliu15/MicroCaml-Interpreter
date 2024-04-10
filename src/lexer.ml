@@ -1,7 +1,6 @@
 open Types
 open Str
 
-exception InvalidposException
 
 let tokenize pos =
   let rec helper pos tokens =
@@ -21,6 +20,8 @@ let tokenize pos =
         let matched = String.sub (matched_group 1 pos) 0 1 in
         let n = int_of_string matched in
         helper (ignore_spaces (string_after pos (String.length matched + 1))) (Tok_Sub :: Tok_Int n :: tokens) 
+
+      else if string_match (regexp "^--") pos 0 then raise (InvalidInputException("double negative"))
 
       else if string_match (regexp "^\\(-?[0-9]+\\)") pos 0 then
         let matched = matched_group 1 pos in
@@ -93,7 +94,7 @@ let tokenize pos =
             if Str.string_match (Str.regexp "^=") pos 0 then
               helper (ignore_spaces (string_after pos 1)) (Tok_Equal :: tokens)
             else
-              raise InvalidposException
+              raise (InvalidInputException("Invalid Input"))
         | '<' ->
             if Str.string_match (Str.regexp "^<=") pos 0 then
               helper (ignore_spaces (string_after pos 2)) (Tok_LessEqual :: tokens)
@@ -110,12 +111,12 @@ let tokenize pos =
             if Str.string_match (Str.regexp "^&&") pos 0 then
               helper (ignore_spaces (string_after pos 2)) (Tok_And :: tokens)
             else
-              raise InvalidposException ("1")
+              raise (InvalidInputException ("1"))
         | '|' ->
             if Str.string_match (Str.regexp "^||") pos 0 then
               helper (ignore_spaces (string_after pos 2)) (Tok_Or :: tokens)
             else
-              raise InvalidposException ("2")
-        | _ -> raise InvalidposException ("3")
+              raise (InvalidInputException ("2"))
+        | _ -> raise (InvalidInputException ("3"))
   in
   helper pos []
